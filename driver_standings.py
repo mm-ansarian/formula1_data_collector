@@ -1,12 +1,24 @@
+from sys import exit
 import datetime
 import requests
 
 
 print('\n\n\n')
 print('Formula 1 Data Collector')
-print('Collecting data...')
 
-season = datetime.date.today().year
+season = input(f'\nEnter the season(from 1950 to {datetime.date.today().year}): ') or datetime.date.today().year
+
+try:
+    season = int(float(season))
+except:
+    print('\n\n!! Invalid input !!\n\n\n')
+    exit()
+else:
+    if season < 1950 or season > datetime.date.today().year:
+        print('\n\n!! The input is out of the specified range !!\n\n\n')
+        exit()
+
+print('\nCollecting data...')
 url = f"https://api.jolpi.ca/ergast/f1/{season}/driverStandings.json"
 
 response = requests.get(url)
@@ -67,11 +79,14 @@ print(f"\n🏆 FORMULA 1 {season} DRIVER STANDINGS")
 print(f"🎯 Season: {season}")
 print("📊 Round: " + round_num)
 print("=" * 88)
-print(f"{'Pos':<5} {'Driver(Nationality)':<28} {'Team':<20} {'Points':<8} {'Wins':<6} {'Podiums':<8}")
+print(f"{'Pos':<5} {'Driver(Nationality)':<28} {'Team':<25} {'Points':<10} {'Wins':<7} {'Podiums':<8}")
 print("-" * 88)
 
 for driver in standings:
-    pos = driver['position']
+    try:
+        pos = driver['position']
+    except:
+        break
     driver_id = driver['Driver']['driverId']
     
     if len(driver['Driver']['givenName'].split(' ')) == 2:
@@ -83,14 +98,14 @@ for driver in standings:
     nat_code = NATIONALITY.get(nationality, nationality[:3].upper())
     
     team = driver['Constructors'][0]['name']
-    points = driver['points']
+    points = int(float(driver['points']))
     wins = driver['wins']
     
     podiums = podiums_data.get(driver_id, 0)
     
     driver_with_nat = f"{name}({nat_code})"
     
-    print(f"{pos:<2}    {driver_with_nat:<28} {team:<20} {points:>8} {wins:>6} {podiums:>8}")
+    print(f"{pos:<2}    {driver_with_nat:<28} {team:<26} {points:<10} {wins:<2} {podiums:>8}")
 
 print("=" * 88)
 print('\n\n\n')
